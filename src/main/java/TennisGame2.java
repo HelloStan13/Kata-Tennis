@@ -1,11 +1,8 @@
-
 public class TennisGame2 implements TennisGame
 {
-    public int P1point = 0;
-    public int P2point = 0;
-    
-    public String P1res = "";
-    public String P2res = "";
+    public int player1Points = 0;
+    public int player2Points = 0;
+
     private String player1Name;
     private String player2Name;
 
@@ -14,122 +11,110 @@ public class TennisGame2 implements TennisGame
         this.player2Name = player2Name;
     }
 
-    public String getScore(){
+    public String getScore() {
+        if (arePlayersTied())
+            return getResponseTiedScore();
+
+        if (isThereAnyPlayerAboutToWin())
+            return decideWinner();
+
+        return getPreFinalResult();
+    }
+
+    private boolean isThereAnyPlayerAboutToWin() {
+        return player1Points>=4 || player2Points>=4;
+    }
+
+    private boolean arePlayersTied() {
+        return player1Points==player2Points;
+    }
+
+    private String getPlayerWithAdvantage(int minusResult)
+    {
+        if (minusResult == 1)
+            return "Advantage ".concat(player1Name);
+
+        return "Advantage ".concat(player2Name);
+    }
+
+    private String decideWinner() {
+        String score;
+        int minusResult = getDiffScore();
+        score = getPlayerWithAdvantage(minusResult);
+        if (minusResult>=2) score = "Win for ".concat(player1Name);
+        if (minusResult <= -2) score ="Win for ".concat(player2Name);
+        return score;
+    }
+
+    private int getDiffScore() {
+        return player1Points-player2Points;
+    }
+
+    private String getPreFinalResult() {
+        int tempScore = 0;
         String score = "";
-        if (P1point == P2point && P1point < 4)
+        for (int i = 1; i<3; i++)
         {
-            if (P1point==0)
-                score = "Love";
-            if (P1point==1)
-                score = "Fifteen";
-            if (P1point==2)
-                score = "Thirty";
-            score += "-All";
-        }
-        if (P1point==P2point && P1point>=3)
-            score = "Deuce";
-        
-        if (P1point > 0 && P2point==0)
-        {
-            if (P1point==1)
-                P1res = "Fifteen";
-            if (P1point==2)
-                P1res = "Thirty";
-            if (P1point==3)
-                P1res = "Forty";
-            
-            P2res = "Love";
-            score = P1res + "-" + P2res;
-        }
-        if (P2point > 0 && P1point==0)
-        {
-            if (P2point==1)
-                P2res = "Fifteen";
-            if (P2point==2)
-                P2res = "Thirty";
-            if (P2point==3)
-                P2res = "Forty";
-            
-            P1res = "Love";
-            score = P1res + "-" + P2res;
-        }
-        
-        if (P1point>P2point && P1point < 4)
-        {
-            if (P1point==2)
-                P1res="Thirty";
-            if (P1point==3)
-                P1res="Forty";
-            if (P2point==1)
-                P2res="Fifteen";
-            if (P2point==2)
-                P2res="Thirty";
-            score = P1res + "-" + P2res;
-        }
-        if (P2point>P1point && P2point < 4)
-        {
-            if (P2point==2)
-                P2res="Thirty";
-            if (P2point==3)
-                P2res="Forty";
-            if (P1point==1)
-                P1res="Fifteen";
-            if (P1point==2)
-                P1res="Thirty";
-            score = P1res + "-" + P2res;
-        }
-        
-        if (P1point > P2point && P2point >= 3)
-        {
-            score = "Advantage player1";
-        }
-        
-        if (P2point > P1point && P1point >= 3)
-        {
-            score = "Advantage player2";
-        }
-        
-        if (P1point>=4 && P2point>=0 && (P1point-P2point)>=2)
-        {
-            score = "Win for player1";
-        }
-        if (P2point>=4 && P1point>=0 && (P2point-P1point)>=2)
-        {
-            score = "Win for player2";
+            if (i == 2)
+                score = score.concat("-");
+
+            tempScore = getPlayerTempScore(i);
+            score = getTempResponseScore(score, tempScore);
         }
         return score;
     }
-    
-    public void SetP1Score(int number){
-        
-        for (int i = 0; i < number; i++)
+
+    private int getPlayerTempScore(int player) {
+        if (player ==1)
+            return player1Points;
+
+        return player2Points;
+    }
+
+    private String getTempResponseScore(String score, int tempScore) {
+        switch(tempScore)
         {
-            P1Score();
+            case 0:
+                score = score.concat("Love");
+                break;
+            case 1:
+                score = score.concat("Fifteen");
+                break;
+            case 2:
+                score = score.concat("Thirty");
+                break;
+            case 3:
+                score = score.concat("Forty");
         }
-            
+        return score;
     }
-    
-    public void SetP2Score(int number){
-        
-        for (int i = 0; i < number; i++)
+
+    private String getResponseTiedScore() {
+        switch (player1Points)
         {
-            P2Score();
+            case 0:
+                return "Love-All";
+            case 1:
+                return "Fifteen-All";
+            case 2:
+                return "Thirty-All";
+            default:
+                return "Deuce";
         }
-            
     }
-    
-    public void P1Score(){
-        P1point++;
+
+    public void addPlayer1Score(){
+        player1Points++;
     }
-    
-    public void P2Score(){
-        P2point++;
+
+    public void addPlayer2Score(){
+        player2Points++;
     }
 
     public void wonPoint(String player) {
-        if (player == "player1")
-            P1Score();
-        else
-            P2Score();
+        if (player.equalsIgnoreCase(player1Name))
+            addPlayer1Score();
+        if (player.equalsIgnoreCase(player2Name))
+            addPlayer2Score();
     }
 }
